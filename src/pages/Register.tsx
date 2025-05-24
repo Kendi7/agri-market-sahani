@@ -7,16 +7,22 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Shield, Smartphone, Users } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+import { toast } from 'sonner';
 
 const Register = () => {
   const [searchParams] = useSearchParams();
   const userType = searchParams.get('type') || 'farmer';
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     phone: '',
-    otp: '',
+    password: '',
+    confirmPassword: '',
     firstName: '',
     lastName: '',
     county: '',
@@ -36,24 +42,67 @@ const Register = () => {
   };
 
   const handlePhoneSubmit = () => {
-    // Simulate sending OTP
-    console.log('Sending OTP to:', formData.phone);
+    if (!formData.phone || formData.phone.length < 9) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
     setStep(2);
   };
 
-  const handleOTPVerification = () => {
-    // Simulate OTP verification
-    console.log('Verifying OTP:', formData.otp);
+  const handlePasswordSubmit = () => {
+    if (formData.password.length < 6) {
+      toast.error('Password must be at least 6 characters');
+      return;
+    }
+    if (formData.password !== formData.confirmPassword) {
+      toast.error('Passwords do not match');
+      return;
+    }
     setStep(3);
   };
 
-  const handleRegistrationComplete = () => {
-    // Simulate registration completion
-    console.log('Registration completed:', formData);
-    if (userType === 'farmer') {
-      window.location.href = '/farmer-dashboard';
-    } else {
-      window.location.href = '/buyer-dashboard';
+  const handleRegistrationComplete = async () => {
+    if (!formData.firstName || !formData.lastName || !formData.county) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // Format phone number for Kenyan format
+      let formattedPhone = formData.phone;
+      if (formattedPhone.startsWith('0')) {
+        formattedPhone = '+254' + formattedPhone.substring(1);
+      } else if (!formattedPhone.startsWith('+254')) {
+        formattedPhone = '+254' + formattedPhone;
+      }
+
+      const { data, error } = await signUp(formattedPhone, formData.password, {
+        phone_number: formattedPhone,
+        full_name: `${formData.firstName} ${formData.lastName}`,
+        user_role: userType,
+        county: formData.county,
+        sub_county: formData.subCounty,
+        farmer_type: formData.farmerType,
+        business_name: formData.businessName,
+        business_type: formData.businessType
+      });
+
+      if (error) {
+        toast.error('Registration failed: ' + error.message);
+        return;
+      }
+
+      if (data.user) {
+        toast.success('Registration successful! Welcome to AgriConnect!');
+        // Navigation will be handled by the auth state change
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error('An unexpected error occurred');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -81,7 +130,7 @@ const Register = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-xl">
               {step === 1 && 'Enter Your Phone Number'}
-              {step === 2 && 'Verify Your Number'}
+              {step === 2 && 'Create Your Password'}
               {step === 3 && 'Complete Your Profile'}
             </CardTitle>
             <div className="flex justify-center space-x-2 mt-4">
@@ -109,7 +158,7 @@ const Register = () => {
                     />
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    We'll send an OTP to verify your number
+                    This will be your login username
                   </p>
                 </div>
 
@@ -130,35 +179,36 @@ const Register = () => {
                   onClick={handlePhoneSubmit}
                   disabled={!formData.phone || formData.phone.length < 9}
                 >
-                  Send OTP
+                  Continue
                 </Button>
               </div>
             )}
 
             {step === 2 && (
               <div className="space-y-4">
-                <div className="text-center">
-                  <p className="text-gray-600 mb-4">
-                    We sent a 6-digit code to <strong>+254{formData.phone}</strong>
+                <div>
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    placeholder="Create a strong password"
+                    value={formData.password}
+                    onChange={(e) => handleInputChange('password', e.target.value)}
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    At least 6 characters
                   </p>
                 </div>
 
                 <div>
-                  <Label htmlFor="otp">Enter OTP Code</Label>
+                  <Label htmlFor="confirmPassword">Confirm Password</Label>
                   <Input
-                    id="otp"
-                    placeholder="123456"
-                    value={formData.otp}
-                    onChange={(e) => handleInputChange('otp', e.target.value)}
-                    className="text-center text-lg tracking-widest"
-                    maxLength={6}
+                    id="confirmPassword"
+                    type="password"
+                    placeholder="Confirm your password"
+                    value={formData.confirmPassword}
+                    onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                   />
-                </div>
-
-                <div className="bg-orange-50 border border-orange-200 rounded-lg p-3">
-                  <p className="text-sm text-orange-700">
-                    Didn't receive the code? Check your SMS or wait 60 seconds to resend.
-                  </p>
                 </div>
 
                 <div className="flex space-x-3">
@@ -171,10 +221,10 @@ const Register = () => {
                   </Button>
                   <Button 
                     className="flex-1 bg-green-600 hover:bg-green-700"
-                    onClick={handleOTPVerification}
-                    disabled={!formData.otp || formData.otp.length !== 6}
+                    onClick={handlePasswordSubmit}
+                    disabled={!formData.password || !formData.confirmPassword}
                   >
-                    Verify
+                    Continue
                   </Button>
                 </div>
               </div>
@@ -333,9 +383,9 @@ const Register = () => {
                   <Button 
                     className="flex-1 bg-green-600 hover:bg-green-700"
                     onClick={handleRegistrationComplete}
-                    disabled={!formData.firstName || !formData.lastName || !formData.county}
+                    disabled={loading || !formData.firstName || !formData.lastName || !formData.county}
                   >
-                    Complete Registration
+                    {loading ? 'Creating Account...' : 'Complete Registration'}
                   </Button>
                 </div>
               </div>
@@ -359,6 +409,15 @@ const Register = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-600">
+            Already have an account?{' '}
+            <Link to="/login" className="text-green-600 hover:text-green-700 font-medium">
+              Sign in here
+            </Link>
+          </p>
         </div>
       </div>
     </div>

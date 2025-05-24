@@ -1,273 +1,299 @@
 
-import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { ArrowRight, Users, TrendingUp, Shield, Smartphone } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { 
+  Smartphone, 
+  TrendingUp, 
+  Shield, 
+  MapPin, 
+  Users, 
+  Star,
+  ArrowRight,
+  LogIn
+} from "lucide-react";
+import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 
 const Index = () => {
+  const { user, profile } = useAuth();
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-green-100">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-lg">A</span>
+      {/* Navigation */}
+      <nav className="bg-white shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            <div className="flex items-center space-x-2">
+              <div className="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center">
+                <span className="text-white font-bold text-xl">A</span>
+              </div>
+              <span className="text-2xl font-bold text-gray-800">AgriConnect</span>
             </div>
-            <span className="text-xl font-bold text-gray-800">AgriConnect</span>
-          </div>
-          <div className="hidden md:flex space-x-4">
-            <Link to="/farmer-dashboard">
-              <Button variant="outline">Farmer Login</Button>
-            </Link>
-            <Link to="/buyer-dashboard">
-              <Button className="bg-green-600 hover:bg-green-700">Buyer Login</Button>
-            </Link>
+            <div className="flex items-center space-x-4">
+              {user ? (
+                <div className="flex items-center space-x-4">
+                  <span className="text-sm text-gray-600">Welcome, {profile?.full_name}</span>
+                  <Link 
+                    to={profile?.user_role === 'farmer' ? '/farmer-dashboard' : '/buyer-dashboard'}
+                  >
+                    <Button className="bg-green-600 hover:bg-green-700">
+                      Go to Dashboard
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="flex items-center space-x-2">
+                  <Link to="/login">
+                    <Button variant="outline" className="flex items-center space-x-2">
+                      <LogIn className="h-4 w-4" />
+                      <span>Sign In</span>
+                    </Button>
+                  </Link>
+                  <Link to="/register">
+                    <Button className="bg-green-600 hover:bg-green-700">
+                      Join Now
+                    </Button>
+                  </Link>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-      </header>
+      </nav>
 
       {/* Hero Section */}
-      <section className="container mx-auto px-4 py-16 text-center">
-        <div className="max-w-4xl mx-auto">
-          <Badge className="mb-4 bg-green-100 text-green-800 px-4 py-2">
-            🇰🇪 Connecting Kenyan Farmers & Buyers
-          </Badge>
-          <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-6">
-            Direct Market Access for
-            <span className="text-green-600 block">Small-Scale Farmers</span>
-          </h1>
-          <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-            Skip the middlemen. Get fair prices. Connect directly with buyers through our M-Pesa integrated marketplace.
-          </p>
-          
-          <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
-            <Link to="/register?type=farmer">
-              <Button size="lg" className="bg-green-600 hover:bg-green-700 text-white px-8 py-4 text-lg">
-                I'm a Farmer <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-            <Link to="/register?type=buyer">
-              <Button size="lg" variant="outline" className="border-green-600 text-green-600 hover:bg-green-50 px-8 py-4 text-lg">
-                I'm a Buyer <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
-            </Link>
-          </div>
-
-          {/* Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16">
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">500+</div>
-              <div className="text-gray-600">Active Farmers</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">KES 2.5M</div>
-              <div className="text-gray-600">Transactions Monthly</div>
-            </div>
-            <div className="text-center">
-              <div className="text-3xl font-bold text-green-600 mb-2">15%</div>
-              <div className="text-gray-600">Average Price Increase</div>
-            </div>
+      <div className="relative overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+          <div className="text-center">
+            <Badge className="bg-green-100 text-green-800 px-4 py-2 mb-6">
+              🇰🇪 Made for Kenyan Farmers & Buyers
+            </Badge>
+            <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-6">
+              Connect. Trade. Grow.
+            </h1>
+            <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+              AgriConnect bridges the gap between small-scale farmers and buyers across Kenya. 
+              Get fair prices, skip the middlemen, and grow your agricultural business.
+            </p>
+            
+            {!user && (
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link to="/register?type=farmer">
+                  <Button size="lg" className="bg-green-600 hover:bg-green-700 text-lg px-8 py-3">
+                    🌱 I'm a Farmer
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link to="/register?type=buyer">
+                  <Button size="lg" variant="outline" className="text-lg px-8 py-3">
+                    🛒 I'm a Buyer
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </div>
+            )}
           </div>
         </div>
-      </section>
+      </div>
 
       {/* Features Section */}
-      <section className="bg-white py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              Everything You Need to Succeed
+      <div className="py-24 bg-white">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Why Choose AgriConnect?
             </h2>
-            <p className="text-gray-600 max-w-2xl mx-auto">
-              Our platform provides farmers and buyers with the tools needed for direct, transparent, and profitable agricultural trade.
+            <p className="text-xl text-gray-600">
+              Built specifically for the Kenyan agricultural market
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="border-green-100 hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Smartphone className="h-6 w-6 text-green-600" />
                 </div>
-                <CardTitle className="text-lg">M-Pesa Integration</CardTitle>
+                <CardTitle>M-Pesa Integration</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 text-center">
-                  Secure payments through M-Pesa STK push with automatic escrow protection.
+                <p className="text-gray-600">
+                  Secure payments through M-Pesa. No bank account needed. 
+                  Get paid instantly when your produce is delivered.
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-green-100 hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <TrendingUp className="h-6 w-6 text-green-600" />
                 </div>
-                <CardTitle className="text-lg">Real-Time Prices</CardTitle>
+                <CardTitle>Real-time Market Prices</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 text-center">
-                  Live market prices and alerts to help you sell at the best time.
+                <p className="text-gray-600">
+                  Get live market prices from Nairobi, Mombasa, Kisumu and other major markets. 
+                  Know the best time to sell your crops.
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-green-100 hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
-                  <Users className="h-6 w-6 text-green-600" />
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <MapPin className="h-6 w-6 text-green-600" />
                 </div>
-                <CardTitle className="text-lg">Direct Matching</CardTitle>
+                <CardTitle>Location-based Matching</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 text-center">
-                  Smart location-based matching with buyers within 50km radius.
+                <p className="text-gray-600">
+                  Find buyers and farmers near you. Reduce transport costs and 
+                  get fresh produce faster with smart location matching.
                 </p>
               </CardContent>
             </Card>
 
             <Card className="border-green-100 hover:shadow-lg transition-shadow">
-              <CardHeader className="text-center">
-                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
                   <Shield className="h-6 w-6 text-green-600" />
                 </div>
-                <CardTitle className="text-lg">Secure Trading</CardTitle>
+                <CardTitle>Quality Assurance</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 text-center">
-                  Verified users, secure transactions, and dispute resolution.
+                <p className="text-gray-600">
+                  Grade your produce (Grade 1, 2, 3) and build trust through our 
+                  rating system. Quality farmers get premium prices.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-100 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <Users className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle>Direct Communication</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  Chat directly with buyers and farmers. Negotiate prices, 
+                  arrange delivery, and build long-term business relationships.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card className="border-green-100 hover:shadow-lg transition-shadow">
+              <CardHeader>
+                <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
+                  <Star className="h-6 w-6 text-green-600" />
+                </div>
+                <CardTitle>Fair Trade</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="text-gray-600">
+                  No exploitation. Farmers set their own prices. Buyers get competitive 
+                  rates. Everyone wins with transparent trading.
                 </p>
               </CardContent>
             </Card>
           </div>
         </div>
-      </section>
+      </div>
 
-      {/* How It Works */}
-      <section className="bg-green-50 py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-gray-800 mb-4">
-              How AgriConnect Works
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* For Farmers */}
+      {/* Stats Section */}
+      <div className="py-16 bg-green-600">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
             <div>
-              <h3 className="text-2xl font-bold text-green-600 mb-6 text-center">For Farmers</h3>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Register with Phone</h4>
-                    <p className="text-gray-600">Sign up using your phone number and verify with OTP</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">List Your Produce</h4>
-                    <p className="text-gray-600">Add your crops, quantities, and quality grades</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Get Matched</h4>
-                    <p className="text-gray-600">Receive notifications when nearby buyers are interested</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Get Paid</h4>
-                    <p className="text-gray-600">Receive instant M-Pesa payments after delivery confirmation</p>
-                  </div>
-                </div>
-              </div>
+              <div className="text-4xl font-bold text-white mb-2">500+</div>
+              <div className="text-green-100">Active Farmers</div>
             </div>
-
-            {/* For Buyers */}
             <div>
-              <h3 className="text-2xl font-bold text-green-600 mb-6 text-center">For Buyers</h3>
-              <div className="space-y-6">
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">1</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Create Account</h4>
-                    <p className="text-gray-600">Sign up and complete your buyer profile</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">2</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Search Produce</h4>
-                    <p className="text-gray-600">Find crops by location, quality, and quantity</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">3</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Place Orders</h4>
-                    <p className="text-gray-600">Connect directly with farmers and negotiate terms</p>
-                  </div>
-                </div>
-                <div className="flex items-start space-x-4">
-                  <div className="w-8 h-8 bg-green-600 text-white rounded-full flex items-center justify-center font-bold text-sm">4</div>
-                  <div>
-                    <h4 className="font-semibold text-gray-800">Pay Securely</h4>
-                    <p className="text-gray-600">Use M-Pesa with escrow protection until delivery</p>
-                  </div>
-                </div>
-              </div>
+              <div className="text-4xl font-bold text-white mb-2">15%</div>
+              <div className="text-green-100">Average Price Increase</div>
+            </div>
+            <div>
+              <div className="text-4xl font-bold text-white mb-2">47</div>
+              <div className="text-green-100">Counties Covered</div>
             </div>
           </div>
         </div>
-      </section>
+      </div>
 
       {/* CTA Section */}
-      <section className="bg-green-600 py-16">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
-            Ready to Transform Your Agricultural Business?
-          </h2>
-          <p className="text-green-100 text-lg mb-8 max-w-2xl mx-auto">
-            Join thousands of Kenyan farmers and buyers who are already earning more through direct market access.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link to="/register?type=farmer">
-              <Button size="lg" className="bg-white text-green-600 hover:bg-gray-100 px-8 py-4">
-                Start Selling Today
-              </Button>
-            </Link>
-            <Link to="/register?type=buyer">
-              <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-green-600 px-8 py-4">
-                Find Fresh Produce
-              </Button>
-            </Link>
+      {!user && (
+        <div className="py-24 bg-gray-50">
+          <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">
+              Ready to Transform Your Agricultural Business?
+            </h2>
+            <p className="text-xl text-gray-600 mb-8">
+              Join thousands of farmers and buyers already trading on AgriConnect
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link to="/register?type=farmer">
+                <Button size="lg" className="bg-green-600 hover:bg-green-700">
+                  Start Selling Your Crops
+                </Button>
+              </Link>
+              <Link to="/register?type=buyer">
+                <Button size="lg" variant="outline">
+                  Find Quality Produce
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
-      </section>
+      )}
 
       {/* Footer */}
-      <footer className="bg-gray-800 text-white py-8">
-        <div className="container mx-auto px-4 text-center">
-          <div className="flex items-center justify-center space-x-2 mb-4">
-            <div className="w-6 h-6 bg-green-600 rounded flex items-center justify-center">
-              <span className="text-white font-bold text-sm">A</span>
+      <footer className="bg-gray-800 text-white py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid md:grid-cols-4 gap-8">
+            <div>
+              <div className="flex items-center space-x-2 mb-4">
+                <div className="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                  <span className="text-white font-bold">A</span>
+                </div>
+                <span className="text-xl font-bold">AgriConnect</span>
+              </div>
+              <p className="text-gray-400">
+                Empowering Kenyan farmers through direct market access and fair trade.
+              </p>
             </div>
-            <span className="text-lg font-semibold">AgriConnect</span>
+            <div>
+              <h3 className="font-semibold mb-4">For Farmers</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>List Your Produce</li>
+                <li>Market Prices</li>
+                <li>Quality Grading</li>
+                <li>Payment Protection</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">For Buyers</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>Find Fresh Produce</li>
+                <li>Direct from Farmers</li>
+                <li>Quality Assurance</li>
+                <li>Local Sourcing</li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Support</h3>
+              <ul className="space-y-2 text-gray-400">
+                <li>Help Center</li>
+                <li>Contact Us</li>
+                <li>Terms of Service</li>
+                <li>Privacy Policy</li>
+              </ul>
+            </div>
           </div>
-          <p className="text-gray-400 mb-4">
-            Connecting Kenyan farmers with buyers for fair and transparent trade.
-          </p>
-          <div className="text-sm text-gray-500">
-            <p>© 2024 AgriConnect. Made with ❤️ for Kenyan agriculture.</p>
-            <p className="mt-2">📱 Support: +254 700 000 000 | 📧 hello@agriconnect.co.ke</p>
+          <div className="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+            <p>&copy; 2024 AgriConnect Kenya. All rights reserved.</p>
           </div>
         </div>
       </footer>
