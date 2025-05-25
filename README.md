@@ -1,73 +1,70 @@
-# Welcome to your Lovable project
+# 🌾 AgriConnect - Bridging Farmers and Markets
 
-## Project info
+**AgriConnect** is an intuitive digital platform developed to solve market linkage inefficiencies faced by smallholder farmers in Kenya and beyond. It empowers farmers with real-time market data, direct access to buyers, and essential agricultural resources — all in one place.
 
-**URL**: https://lovable.dev/projects/828529e8-c1ad-4566-9a5a-faa3aaf890cb
+🚀 Live App: [agritech-matching-platform.lovable.app](https://agritech-matching-platform.lovable.app/)  
+📊 Pitch Deck: [Gamma Pitch Deck](https://gamma.app/docs/Agritech-Matching-Platform-Pitch-Deck-ij6x3kr0kmnhkb5)  
+💻 GitHub Repo: [github.com/Kendi7/agri-market-sahani](https://github.com/Kendi7/agri-market-sahani.git)
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 🌍 Problem Statement
 
-**Use Lovable**
+Many small-scale farmers in Africa face:
+- Exploitative middlemen
+- Limited access to market prices
+- Poor visibility into buyer demand
+- Inadequate access to agricultural inputs and financing
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/828529e8-c1ad-4566-9a5a-faa3aaf890cb) and start prompting.
+---
 
-Changes made via Lovable will be committed automatically to this repo.
+## ✅ Solution
 
-**Use your preferred IDE**
+**AgriConnect** offers:
+- 🔄 A digital marketplace connecting farmers directly with buyers
+- 📈 Real-time market price updates
+- 💡 Access to verified input suppliers and financial partners
+- 📱 Mobile-first design with multilingual support
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+---
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## 💼 Features
 
-Follow these steps:
+- 🌐 **Online Produce Listings**: Post or browse verified farm produce
+- 🔎 **Market Price Discovery**: View real-time commodity prices
+- 🧩 **Buyer-Farmer Matching**: Intelligent buyer suggestions based on supply
+- 📲 **Mobile-Responsive**: Fully optimized for rural smartphone users
+- 🌍 **Multilingual Interface**: Supports both English and Swahili
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+---
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+## 🛠️ Tech Stack
 
-# Step 3: Install the necessary dependencies.
-npm i
+- **Frontend**: React (with Vite)
+- **UI Components**: shadcn-ui
+- **Styling**: Tailwind CSS
+- **Languages**: TypeScript
+- **Hosting & Deployment**: [Lovable](https://lovable.dev)
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+---
+
+## 📦 Installation Guide
+
+To run the app locally using your preferred IDE:
+
+### Prerequisites:
+- Node.js & npm (Install via [nvm](https://github.com/nvm-sh/nvm#installing-and-updating))
+
+### Steps:
+```bash
+# Step 1: Clone the repository
+git clone https://github.com/Kendi7/agri-market-sahani.git
+
+# Step 2: Navigate to the project directory
+cd agri-market-sahani
+
+# Step 3: Install dependencies
+npm install
+
+# Step 4: Start the development server
 npm run dev
-```
-
-**Edit a file directly in GitHub**
-
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
-
-**Use GitHub Codespaces**
-
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
-
-## What technologies are used for this project?
-
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/828529e8-c1ad-4566-9a5a-faa3aaf890cb) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
