@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -38,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('Auth state change:', event, session);
         setSession(session);
         setUser(session?.user ?? null);
         
@@ -73,38 +75,52 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, metadata: any) => {
-    // Ensure mpesa_number is provided and format it properly
-    const formattedMpesaNumber = metadata.mpesa_number ? 
-      formatMpesaNumber(metadata.mpesa_number) : '';
+    try {
+      // Format M-Pesa number if provided
+      const formattedMpesaNumber = metadata.mpesa_number ? 
+        formatMpesaNumber(metadata.mpesa_number) : '';
 
-    // Prepare metadata with required phone_number field
-    const userMetadata = {
-      email: email,
-      full_name: metadata.full_name || `${metadata.firstName || ''} ${metadata.lastName || ''}`.trim(),
-      user_role: metadata.user_role || 'farmer',
-      county: metadata.county || 'Nairobi',
-      sub_county: metadata.sub_county || '',
-      farmer_type: metadata.farmer_type || '',
-      business_name: metadata.business_name || '',
-      business_type: metadata.business_type || '',
-      phone_number: formattedMpesaNumber, // Use M-Pesa number as phone_number
-      mpesa_number: formattedMpesaNumber
-    };
+      // Prepare clean metadata
+      const userMetadata = {
+        email: email,
+        full_name: metadata.full_name || `${metadata.firstName || ''} ${metadata.lastName || ''}`.trim() || 'User',
+        user_role: metadata.user_role || 'farmer',
+        county: metadata.county || 'Nairobi',
+        sub_county: metadata.sub_county || '',
+        farmer_type: metadata.farmer_type || '',
+        business_name: metadata.business_name || '',
+        business_type: metadata.business_type || '',
+        phone_number: formattedMpesaNumber || '+254700000000', // Ensure we always have a phone number
+        mpesa_number: formattedMpesaNumber || ''
+      };
 
-    console.log('Signing up with metadata:', userMetadata);
+      console.log('Attempting signup with metadata:', userMetadata);
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: userMetadata,
-      },
-    });
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: userMetadata,
+        },
+      });
 
-    return { data, error };
+      if (error) {
+        console.error('Signup error:', error);
+        throw error;
+      }
+
+      console.log('Signup successful:', data);
+      return { data, error: null };
+
+    } catch (error) {
+      console.error('Signup failed:', error);
+      return { data: null, error };
+    }
   };
 
   const formatMpesaNumber = (number: string) => {
+    if (!number) return '';
+    
     // Remove any non-digits
     const digits = number.replace(/\D/g, '');
     
@@ -113,19 +129,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return '+254' + digits.substring(1);
     } else if (digits.startsWith('254')) {
       return '+' + digits;
-    } else if (!digits.startsWith('+254')) {
+    } else if (!digits.startsWith('+254') && digits.length >= 9) {
       return '+254' + digits;
     }
     return digits;
   };
 
   const signIn = async (email: string, password: string) => {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-    return { data, error };
+      if (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
+
+      return { data, error: null };
+    } catch (error) {
+      console.error('Login failed:', error);
+      return { data: null, error };
+    }
   };
 
   const signOut = async () => {

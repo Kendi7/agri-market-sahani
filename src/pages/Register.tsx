@@ -42,8 +42,17 @@ const Register = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
   const handleEmailSubmit = () => {
-    if (!formData.email || !formData.email.includes('@')) {
+    if (!formData.email) {
+      toast.error('Email address is required');
+      return;
+    }
+    if (!validateEmail(formData.email)) {
       toast.error('Please enter a valid email address');
       return;
     }
@@ -51,6 +60,10 @@ const Register = () => {
   };
 
   const handlePasswordSubmit = () => {
+    if (!formData.password) {
+      toast.error('Password is required');
+      return;
+    }
     if (formData.password.length < 6) {
       toast.error('Password must be at least 6 characters');
       return;
@@ -63,55 +76,83 @@ const Register = () => {
   };
 
   const formatMpesaNumber = (number: string) => {
-    // Remove any non-digits
+    if (!number) return '';
     const digits = number.replace(/\D/g, '');
     
-    // Format for Kenyan numbers
     if (digits.startsWith('0')) {
       return '+254' + digits.substring(1);
     } else if (digits.startsWith('254')) {
       return '+' + digits;
-    } else if (!digits.startsWith('+254')) {
+    } else if (!digits.startsWith('+254') && digits.length >= 9) {
       return '+254' + digits;
     }
     return digits;
   };
 
+  const validateForm = () => {
+    if (!formData.firstName.trim()) {
+      toast.error('First name is required');
+      return false;
+    }
+    if (!formData.lastName.trim()) {
+      toast.error('Last name is required');
+      return false;
+    }
+    if (!formData.county) {
+      toast.error('County is required');
+      return false;
+    }
+    if (userType === 'farmer' && !formData.farmerType) {
+      toast.error('Farming type is required');
+      return false;
+    }
+    if (userType === 'buyer' && !formData.businessType) {
+      toast.error('Business type is required');
+      return false;
+    }
+    return true;
+  };
+
   const handleRegistrationComplete = async () => {
-    if (!formData.firstName || !formData.lastName || !formData.county || !formData.mpesaNumber) {
-      toast.error('Please fill in all required fields');
+    if (!validateForm()) {
       return;
     }
 
     setLoading(true);
 
     try {
-      const formattedMpesaNumber = formatMpesaNumber(formData.mpesaNumber);
-
-      const { data, error } = await signUp(formData.email, formData.password, {
-        email: formData.email,
-        full_name: `${formData.firstName} ${formData.lastName}`,
+      const registrationData = {
+        full_name: `${formData.firstName.trim()} ${formData.lastName.trim()}`,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
         user_role: userType,
         county: formData.county,
-        sub_county: formData.subCounty,
-        farmer_type: formData.farmerType,
-        business_name: formData.businessName,
-        business_type: formData.businessType,
-        mpesa_number: formattedMpesaNumber
-      });
+        sub_county: formData.subCounty || '',
+        farmer_type: formData.farmerType || '',
+        business_name: formData.businessName || '',
+        business_type: formData.businessType || '',
+        mpesa_number: formData.mpesaNumber ? formatMpesaNumber(formData.mpesaNumber) : ''
+      };
+
+      console.log('Registration attempt with data:', registrationData);
+
+      const { data, error } = await signUp(formData.email.trim(), formData.password, registrationData);
 
       if (error) {
-        toast.error('Registration failed: ' + error.message);
+        console.error('Registration error details:', error);
+        toast.error(`Registration failed: ${error.message}`);
         return;
       }
 
-      if (data.user) {
+      if (data?.user) {
         toast.success('Registration successful! Please check your email to verify your account.');
         navigate('/login');
+      } else {
+        toast.error('Registration failed: Unexpected response from server');
       }
-    } catch (error) {
-      console.error('Registration error:', error);
-      toast.error('An unexpected error occurred');
+    } catch (error: any) {
+      console.error('Registration exception:', error);
+      toast.error(`Registration failed: ${error.message || 'An unexpected error occurred'}`);
     } finally {
       setLoading(false);
     }
@@ -155,7 +196,7 @@ const Register = () => {
             {step === 1 && (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="email">Email Address</Label>
+                  <Label htmlFor="email">Email Address *</Label>
                   <Input
                     id="email"
                     type="email"
@@ -175,7 +216,7 @@ const Register = () => {
                     <div>
                       <h4 className="font-medium text-blue-800">Secure Registration</h4>
                       <p className="text-sm text-blue-700">
-                        Your email is used for secure authentication. You'll also provide your M-Pesa number for payments.
+                        Your email is used for secure authentication. You can also provide your M-Pesa number for payments.
                       </p>
                     </div>
                   </div>
@@ -184,7 +225,7 @@ const Register = () => {
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700"
                   onClick={handleEmailSubmit}
-                  disabled={!formData.email}
+                  disabled={!formData.email.trim()}
                 >
                   Continue
                 </Button>
@@ -194,7 +235,7 @@ const Register = () => {
             {step === 2 && (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Password *</Label>
                   <Input
                     id="password"
                     type="password"
@@ -208,7 +249,7 @@ const Register = () => {
                 </div>
 
                 <div>
-                  <Label htmlFor="confirmPassword">Confirm Password</Label>
+                  <Label htmlFor="confirmPassword">Confirm Password *</Label>
                   <Input
                     id="confirmPassword"
                     type="password"
@@ -248,7 +289,7 @@ const Register = () => {
                   <TabsContent value="farmer" className="space-y-4 mt-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="firstName">First Name *</Label>
                         <Input
                           id="firstName"
                           placeholder="John"
@@ -257,7 +298,7 @@ const Register = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="lastName">Last Name *</Label>
                         <Input
                           id="lastName"
                           placeholder="Mwangi"
@@ -268,7 +309,7 @@ const Register = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="mpesaNumber">M-Pesa Number</Label>
+                      <Label htmlFor="mpesaNumber">M-Pesa Number (Optional)</Label>
                       <div className="flex space-x-2">
                         <div className="flex items-center px-3 py-2 border rounded-md bg-gray-50">
                           <span className="text-sm text-gray-600">+254</span>
@@ -282,12 +323,12 @@ const Register = () => {
                         />
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        For M-Pesa payments and transactions
+                        For M-Pesa payments and transactions (can be added later)
                       </p>
                     </div>
 
                     <div>
-                      <Label>County</Label>
+                      <Label>County *</Label>
                       <Select value={formData.county} onValueChange={(value) => handleInputChange('county', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your county" />
@@ -303,7 +344,7 @@ const Register = () => {
                     </div>
 
                     <div>
-                      <Label>Farming Type</Label>
+                      <Label>Farming Type *</Label>
                       <Select value={formData.farmerType} onValueChange={(value) => handleInputChange('farmerType', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="What do you grow?" />
@@ -322,7 +363,7 @@ const Register = () => {
                   <TabsContent value="buyer" className="space-y-4 mt-6">
                     <div className="grid grid-cols-2 gap-4">
                       <div>
-                        <Label htmlFor="firstName">First Name</Label>
+                        <Label htmlFor="firstName">First Name *</Label>
                         <Input
                           id="firstName"
                           placeholder="Ahmed"
@@ -331,7 +372,7 @@ const Register = () => {
                         />
                       </div>
                       <div>
-                        <Label htmlFor="lastName">Last Name</Label>
+                        <Label htmlFor="lastName">Last Name *</Label>
                         <Input
                           id="lastName"
                           placeholder="Khalil"
@@ -342,7 +383,7 @@ const Register = () => {
                     </div>
 
                     <div>
-                      <Label htmlFor="mpesaNumber">M-Pesa Number</Label>
+                      <Label htmlFor="mpesaNumber">M-Pesa Number (Optional)</Label>
                       <div className="flex space-x-2">
                         <div className="flex items-center px-3 py-2 border rounded-md bg-gray-50">
                           <span className="text-sm text-gray-600">+254</span>
@@ -356,7 +397,7 @@ const Register = () => {
                         />
                       </div>
                       <p className="text-xs text-gray-500 mt-1">
-                        For M-Pesa payments and transactions
+                        For M-Pesa payments and transactions (can be added later)
                       </p>
                     </div>
 
@@ -371,7 +412,7 @@ const Register = () => {
                     </div>
 
                     <div>
-                      <Label>Business Type</Label>
+                      <Label>Business Type *</Label>
                       <Select value={formData.businessType} onValueChange={(value) => handleInputChange('businessType', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select business type" />
@@ -388,7 +429,7 @@ const Register = () => {
                     </div>
 
                     <div>
-                      <Label>Primary Location</Label>
+                      <Label>Primary Location *</Label>
                       <Select value={formData.county} onValueChange={(value) => handleInputChange('county', value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select your county" />
@@ -409,9 +450,9 @@ const Register = () => {
                   <div className="flex items-start space-x-3">
                     <Mail className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <h4 className="font-medium text-green-800">Email & M-Pesa Ready</h4>
+                      <h4 className="font-medium text-green-800">Email Authentication</h4>
                       <p className="text-sm text-green-700">
-                        Login with {formData.email} and use +254{formData.mpesaNumber} for M-Pesa transactions.
+                        Login with {formData.email} and add payment details later.
                       </p>
                     </div>
                   </div>
@@ -428,7 +469,7 @@ const Register = () => {
                   <Button 
                     className="flex-1 bg-green-600 hover:bg-green-700"
                     onClick={handleRegistrationComplete}
-                    disabled={loading || !formData.firstName || !formData.lastName || !formData.county || !formData.mpesaNumber}
+                    disabled={loading || !formData.firstName.trim() || !formData.lastName.trim() || !formData.county}
                   >
                     {loading ? 'Creating Account...' : 'Complete Registration'}
                   </Button>
