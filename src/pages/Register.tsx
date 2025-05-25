@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
 import { useSearchParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Shield, Smartphone, Users } from 'lucide-react';
+import { ArrowLeft, Shield, Mail, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -20,7 +20,7 @@ const Register = () => {
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    phone: '',
+    email: '',
     password: '',
     confirmPassword: '',
     firstName: '',
@@ -29,7 +29,8 @@ const Register = () => {
     subCounty: '',
     farmerType: '',
     businessName: '',
-    businessType: ''
+    businessType: '',
+    mpesaNumber: ''
   });
 
   const kenyanCounties = [
@@ -41,9 +42,9 @@ const Register = () => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handlePhoneSubmit = () => {
-    if (!formData.phone || formData.phone.length < 9) {
-      toast.error('Please enter a valid phone number');
+  const handleEmailSubmit = () => {
+    if (!formData.email || !formData.email.includes('@')) {
+      toast.error('Please enter a valid email address');
       return;
     }
     setStep(2);
@@ -61,8 +62,23 @@ const Register = () => {
     setStep(3);
   };
 
+  const formatMpesaNumber = (number: string) => {
+    // Remove any non-digits
+    const digits = number.replace(/\D/g, '');
+    
+    // Format for Kenyan numbers
+    if (digits.startsWith('0')) {
+      return '+254' + digits.substring(1);
+    } else if (digits.startsWith('254')) {
+      return '+' + digits;
+    } else if (!digits.startsWith('+254')) {
+      return '+254' + digits;
+    }
+    return digits;
+  };
+
   const handleRegistrationComplete = async () => {
-    if (!formData.firstName || !formData.lastName || !formData.county) {
+    if (!formData.firstName || !formData.lastName || !formData.county || !formData.mpesaNumber) {
       toast.error('Please fill in all required fields');
       return;
     }
@@ -70,23 +86,18 @@ const Register = () => {
     setLoading(true);
 
     try {
-      // Format phone number for Kenyan format
-      let formattedPhone = formData.phone;
-      if (formattedPhone.startsWith('0')) {
-        formattedPhone = '+254' + formattedPhone.substring(1);
-      } else if (!formattedPhone.startsWith('+254')) {
-        formattedPhone = '+254' + formattedPhone;
-      }
+      const formattedMpesaNumber = formatMpesaNumber(formData.mpesaNumber);
 
-      const { data, error } = await signUp(formattedPhone, formData.password, {
-        phone_number: formattedPhone,
+      const { data, error } = await signUp(formData.email, formData.password, {
+        email: formData.email,
         full_name: `${formData.firstName} ${formData.lastName}`,
         user_role: userType,
         county: formData.county,
         sub_county: formData.subCounty,
         farmer_type: formData.farmerType,
         business_name: formData.businessName,
-        business_type: formData.businessType
+        business_type: formData.businessType,
+        mpesa_number: formattedMpesaNumber
       });
 
       if (error) {
@@ -95,8 +106,8 @@ const Register = () => {
       }
 
       if (data.user) {
-        toast.success('Registration successful! Welcome to AgriConnect!');
-        // Navigation will be handled by the auth state change
+        toast.success('Registration successful! Please check your email to verify your account.');
+        navigate('/login');
       }
     } catch (error) {
       console.error('Registration error:', error);
@@ -129,7 +140,7 @@ const Register = () => {
         <Card className="shadow-lg">
           <CardHeader className="text-center">
             <CardTitle className="text-xl">
-              {step === 1 && 'Enter Your Phone Number'}
+              {step === 1 && 'Enter Your Email Address'}
               {step === 2 && 'Create Your Password'}
               {step === 3 && 'Complete Your Profile'}
             </CardTitle>
@@ -144,21 +155,17 @@ const Register = () => {
             {step === 1 && (
               <div className="space-y-4">
                 <div>
-                  <Label htmlFor="phone">Phone Number</Label>
-                  <div className="flex space-x-2">
-                    <div className="flex items-center px-3 py-2 border rounded-md bg-gray-50">
-                      <span className="text-sm text-gray-600">+254</span>
-                    </div>
-                    <Input
-                      id="phone"
-                      placeholder="712 345 678"
-                      value={formData.phone}
-                      onChange={(e) => handleInputChange('phone', e.target.value)}
-                      className="flex-1"
-                    />
-                  </div>
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="john@example.com"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    className="w-full"
+                  />
                   <p className="text-xs text-gray-500 mt-1">
-                    This will be your login username
+                    This will be your login email
                   </p>
                 </div>
 
@@ -168,7 +175,7 @@ const Register = () => {
                     <div>
                       <h4 className="font-medium text-blue-800">Secure Registration</h4>
                       <p className="text-sm text-blue-700">
-                        Your phone number is used for secure authentication and M-Pesa transactions.
+                        Your email is used for secure authentication. You'll also provide your M-Pesa number for payments.
                       </p>
                     </div>
                   </div>
@@ -176,8 +183,8 @@ const Register = () => {
 
                 <Button 
                   className="w-full bg-green-600 hover:bg-green-700"
-                  onClick={handlePhoneSubmit}
-                  disabled={!formData.phone || formData.phone.length < 9}
+                  onClick={handleEmailSubmit}
+                  disabled={!formData.email}
                 >
                   Continue
                 </Button>
@@ -261,6 +268,25 @@ const Register = () => {
                     </div>
 
                     <div>
+                      <Label htmlFor="mpesaNumber">M-Pesa Number</Label>
+                      <div className="flex space-x-2">
+                        <div className="flex items-center px-3 py-2 border rounded-md bg-gray-50">
+                          <span className="text-sm text-gray-600">+254</span>
+                        </div>
+                        <Input
+                          id="mpesaNumber"
+                          placeholder="712 345 678"
+                          value={formData.mpesaNumber}
+                          onChange={(e) => handleInputChange('mpesaNumber', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        For M-Pesa payments and transactions
+                      </p>
+                    </div>
+
+                    <div>
                       <Label>County</Label>
                       <Select value={formData.county} onValueChange={(value) => handleInputChange('county', value)}>
                         <SelectTrigger>
@@ -316,6 +342,25 @@ const Register = () => {
                     </div>
 
                     <div>
+                      <Label htmlFor="mpesaNumber">M-Pesa Number</Label>
+                      <div className="flex space-x-2">
+                        <div className="flex items-center px-3 py-2 border rounded-md bg-gray-50">
+                          <span className="text-sm text-gray-600">+254</span>
+                        </div>
+                        <Input
+                          id="mpesaNumber"
+                          placeholder="712 345 678"
+                          value={formData.mpesaNumber}
+                          onChange={(e) => handleInputChange('mpesaNumber', e.target.value)}
+                          className="flex-1"
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">
+                        For M-Pesa payments and transactions
+                      </p>
+                    </div>
+
+                    <div>
                       <Label htmlFor="businessName">Business Name (Optional)</Label>
                       <Input
                         id="businessName"
@@ -362,11 +407,11 @@ const Register = () => {
 
                 <div className="bg-green-50 border border-green-200 rounded-lg p-4">
                   <div className="flex items-start space-x-3">
-                    <Smartphone className="h-5 w-5 text-green-600 mt-0.5" />
+                    <Mail className="h-5 w-5 text-green-600 mt-0.5" />
                     <div>
-                      <h4 className="font-medium text-green-800">M-Pesa Ready</h4>
+                      <h4 className="font-medium text-green-800">Email & M-Pesa Ready</h4>
                       <p className="text-sm text-green-700">
-                        Your account will be connected to +254{formData.phone} for secure M-Pesa transactions.
+                        Login with {formData.email} and use +254{formData.mpesaNumber} for M-Pesa transactions.
                       </p>
                     </div>
                   </div>
@@ -383,7 +428,7 @@ const Register = () => {
                   <Button 
                     className="flex-1 bg-green-600 hover:bg-green-700"
                     onClick={handleRegistrationComplete}
-                    disabled={loading || !formData.firstName || !formData.lastName || !formData.county}
+                    disabled={loading || !formData.firstName || !formData.lastName || !formData.county || !formData.mpesaNumber}
                   >
                     {loading ? 'Creating Account...' : 'Complete Registration'}
                   </Button>

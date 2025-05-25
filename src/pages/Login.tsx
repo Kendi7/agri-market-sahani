@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Smartphone } from 'lucide-react';
+import { ArrowLeft, Mail } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { toast } from 'sonner';
 
@@ -13,7 +13,7 @@ const Login = () => {
   const navigate = useNavigate();
   const { signIn } = useAuth();
   const [formData, setFormData] = useState({
-    phone: '',
+    email: '',
     password: '',
   });
   const [loading, setLoading] = useState(false);
@@ -27,15 +27,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      // Format phone number for Kenyan format
-      let formattedPhone = formData.phone;
-      if (formattedPhone.startsWith('0')) {
-        formattedPhone = '+254' + formattedPhone.substring(1);
-      } else if (!formattedPhone.startsWith('+254')) {
-        formattedPhone = '+254' + formattedPhone;
-      }
-
-      const { data, error } = await signIn(formattedPhone, formData.password);
+      const { data, error } = await signIn(formData.email, formData.password);
 
       if (error) {
         toast.error('Login failed: ' + error.message);
@@ -75,7 +67,7 @@ const Login = () => {
         <Card className="shadow-lg">
           <CardHeader>
             <CardTitle className="text-center flex items-center justify-center space-x-2">
-              <Smartphone className="h-5 w-5" />
+              <Mail className="h-5 w-5" />
               <span>Login</span>
             </CardTitle>
           </CardHeader>
@@ -83,20 +75,16 @@ const Login = () => {
           <CardContent>
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <Label htmlFor="phone">Phone Number</Label>
-                <div className="flex space-x-2">
-                  <div className="flex items-center px-3 py-2 border rounded-md bg-gray-50">
-                    <span className="text-sm text-gray-600">+254</span>
-                  </div>
-                  <Input
-                    id="phone"
-                    placeholder="712 345 678"
-                    value={formData.phone}
-                    onChange={(e) => handleInputChange('phone', e.target.value)}
-                    className="flex-1"
-                    required
-                  />
-                </div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="john@example.com"
+                  value={formData.email}
+                  onChange={(e) => handleInputChange('email', e.target.value)}
+                  className="w-full"
+                  required
+                />
               </div>
 
               <div>
@@ -114,7 +102,7 @@ const Login = () => {
               <Button 
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700"
-                disabled={loading || !formData.phone || !formData.password}
+                disabled={loading || !formData.email || !formData.password}
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </Button>
