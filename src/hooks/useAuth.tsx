@@ -73,15 +73,50 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string, metadata: any) => {
+    // Ensure mpesa_number is provided and format it properly
+    const formattedMpesaNumber = metadata.mpesa_number ? 
+      formatMpesaNumber(metadata.mpesa_number) : '';
+
+    // Prepare metadata with required phone_number field
+    const userMetadata = {
+      email: email,
+      full_name: metadata.full_name || `${metadata.firstName || ''} ${metadata.lastName || ''}`.trim(),
+      user_role: metadata.user_role || 'farmer',
+      county: metadata.county || 'Nairobi',
+      sub_county: metadata.sub_county || '',
+      farmer_type: metadata.farmer_type || '',
+      business_name: metadata.business_name || '',
+      business_type: metadata.business_type || '',
+      phone_number: formattedMpesaNumber, // Use M-Pesa number as phone_number
+      mpesa_number: formattedMpesaNumber
+    };
+
+    console.log('Signing up with metadata:', userMetadata);
+
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: metadata,
+        data: userMetadata,
       },
     });
 
     return { data, error };
+  };
+
+  const formatMpesaNumber = (number: string) => {
+    // Remove any non-digits
+    const digits = number.replace(/\D/g, '');
+    
+    // Format for Kenyan numbers
+    if (digits.startsWith('0')) {
+      return '+254' + digits.substring(1);
+    } else if (digits.startsWith('254')) {
+      return '+' + digits;
+    } else if (!digits.startsWith('+254')) {
+      return '+254' + digits;
+    }
+    return digits;
   };
 
   const signIn = async (email: string, password: string) => {
